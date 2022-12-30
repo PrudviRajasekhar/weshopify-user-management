@@ -71,4 +71,16 @@ public class UsersResource {
 		}
 		return rolesResponse;
 	}
+	
+	@PostMapping(value = "/users/roles")
+	public ResponseEntity<List<RoleBean>> createRole(@RequestBody RoleBean rolePayload) {
+		List<RoleBean> rolesList = roleMgmtService.createRole(rolePayload);
+		ResponseEntity<List<RoleBean>> rolesResponse = null;
+		if(null != rolesList && rolesList.size() >0) {
+			rolesResponse = ResponseEntity.ok().body(rolesList);
+		}else {
+			rolesResponse = ResponseEntity.noContent().build();
+		}
+		return rolesResponse;
+	}
 }

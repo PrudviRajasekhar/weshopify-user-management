@@ -7,4 +7,6 @@ import com.weshopify.platform.bean.RoleBean;
 public interface RoleMgmtService {
 
 	public List<RoleBean>  getAllRoles();
+	
+	public List<RoleBean> createRole(RoleBean role);
 }

@@ -22,4 +22,9 @@ public class RoleMgmtServiceImpl implements RoleMgmtService {
 		return roleMgmtClient.findAllRoles();
 	}
 
+	@Override
+	public List<RoleBean> createRole(RoleBean role) {
+		return roleMgmtClient.createRole(role);
+	}
+
 }

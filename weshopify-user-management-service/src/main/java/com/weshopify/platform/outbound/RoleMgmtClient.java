@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -46,13 +48,16 @@ public class RoleMgmtClient {
 
 	@Value("${iamserver.password}")
 	private String iam_password;
+	
+	@Value("${iamserver.role-api-schema}")
+	private String roleApiSchema;
 
 	public List<RoleBean> findAllRoles() {
 		List<RoleBean> resourcesList = null;
 		String role_api_url = iam_server_api_base_url + role_api_context;
 		log.info("constructed role api url is:\t" + role_api_url);
 
-		HttpEntity<String> requestBody = prepareRequestBody();
+		HttpEntity<String> requestBody = prepareRequestBody(null);
 
 		ResponseEntity<Object> apiResponse = restTemplate.exchange(role_api_url, HttpMethod.GET, requestBody,
 				Object.class);
@@ -65,7 +70,41 @@ public class RoleMgmtClient {
 		return Optional.ofNullable(resourcesList).get();
 	}
 
-	private HttpEntity<String> prepareRequestBody() {
+	public List<RoleBean> createRole(RoleBean roleBean){
+		List<RoleBean> resourcesList = null;
+		String role_api_url = iam_server_api_base_url + role_api_context;
+		log.info("constructed role api url is:\t" + role_api_url);
+
+		//roleBean.setSchemas(new String[]{"urn:ietf:params:scim:schemas:extension:2.0:Role"});
+		roleBean.setSchemas(new String[]{roleApiSchema});
+		
+		String rolePayload = null;
+		try {
+			rolePayload = objectMapper.writeValueAsString(roleBean);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//String rolePayload = objectMapper.convertValue(roleBean, String.class);
+		
+		HttpEntity<String> requestBody = prepareRequestBody(rolePayload);
+		
+		ResponseEntity<Object> apiResponse = restTemplate
+											.exchange(role_api_url, 
+													HttpMethod.POST, 
+													requestBody, 
+													Object.class);
+		log.info("response code of the role api is:\t" + apiResponse.getStatusCode().value());
+		if (HttpStatus.CREATED.value() == apiResponse.getStatusCode().value()) {
+			//Object responseBody = apiResponse.getBody();
+			resourcesList = findAllRoles();
+		}
+
+		return Optional.ofNullable(resourcesList).get();
+	}
+	
+	private HttpEntity<String> prepareRequestBody(String rolePayload) {
+		HttpEntity<String> requestBody = null;
 		String adminCreds = iam_user_name + ":" + iam_password;
 		log.info("admin creds are:\t" + adminCreds);
 
@@ -74,8 +113,14 @@ public class RoleMgmtClient {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", "Basic " + encodedAdminCreds);
-
-		HttpEntity<String> requestBody = new HttpEntity<>(headers);
+		if(StringUtils.isEmpty(rolePayload) || StringUtils.isBlank(rolePayload)) {
+			requestBody = new HttpEntity<>(headers);
+		}else {
+			 headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+			 requestBody = new HttpEntity<String>(rolePayload, headers);
+		}
+		
+		
 		return requestBody;
 	}
 

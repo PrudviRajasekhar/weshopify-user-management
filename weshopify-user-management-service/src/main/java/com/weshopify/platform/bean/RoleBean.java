@@ -1,6 +1,7 @@
 package com.weshopify.platform.bean;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Data;
 
@@ -12,5 +13,7 @@ public class RoleBean implements Serializable{/**
 	
 	private String id;
 	private String displayName;
+	private List<String> permissions;
+	private String[] schemas;
 
 }
