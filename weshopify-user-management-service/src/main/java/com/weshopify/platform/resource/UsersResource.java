@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.weshopify.platform.bean.RoleBean;
-import com.weshopify.platform.bean.WeshopifyPlatformUserBean;
+import com.weshopify.platform.bean.UserBean;
 import com.weshopify.platform.service.RoleMgmtService;
+import com.weshopify.platform.service.UserMgmtService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,31 +33,34 @@ public class UsersResource {
 	@Autowired
 	private RoleMgmtService roleMgmtService;
 	
+	@Autowired
+	private UserMgmtService userMgmtService;
+	
 	@PostMapping(value = "/users")
-	public ResponseEntity<List<WeshopifyPlatformUserBean>> createUser(@RequestBody WeshopifyPlatformUserBean userBean) {
+	public ResponseEntity<List<UserBean>> createUser(@RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
 		return null;
 	}
 
 	@GetMapping(value = "/users")
-	public ResponseEntity<List<WeshopifyPlatformUserBean>> findAllUsers() {
-
-		return null;
+	public ResponseEntity<List<UserBean>> findAllUsers() {
+		List<UserBean> usersList = userMgmtService.getAllUsers();
+		return ResponseEntity.ok(usersList);
 	}
 
 	@PutMapping(value = "/users")
-	public ResponseEntity<List<WeshopifyPlatformUserBean>> updateUser(@RequestBody WeshopifyPlatformUserBean userBean) {
+	public ResponseEntity<List<UserBean>> updateUser(@RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
 		return null;
 	}
 
 	@GetMapping(value = "/users/{userId}")
-	public ResponseEntity<WeshopifyPlatformUserBean> findUserById(@PathVariable("userId") String userId) {
+	public ResponseEntity<UserBean> findUserById(@PathVariable("userId") String userId) {
 		return null;
 	}
 	
 	@DeleteMapping(value = "/users/{userId}")
-	public ResponseEntity<List<WeshopifyPlatformUserBean>> deleteUserById(@PathVariable("userId") String userId) {
+	public ResponseEntity<List<UserBean>> deleteUserById(@PathVariable("userId") String userId) {
 		return null;
 	}
 	
