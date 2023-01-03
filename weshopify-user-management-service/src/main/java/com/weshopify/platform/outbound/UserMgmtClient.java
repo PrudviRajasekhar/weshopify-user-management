@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weshopify.platform.model.WSO2User;
 import com.weshopify.platform.utils.ApplicationsUtil;
@@ -27,6 +28,9 @@ public class UserMgmtClient {
 	@Autowired
 	private ApplicationsUtil propsUtil;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	public List<WSO2User> findAllUsers() {
 		String user_api_uri = propsUtil.getIam_server_api_base_url() + propsUtil.getUser_api_context();
 		log.info("user api is ", user_api_uri);
@@ -39,6 +43,31 @@ public class UserMgmtClient {
 		if (HttpStatus.OK.value() == apiResponse.getStatusCode().value()) {
 			Object responseBody = apiResponse.getBody();
 			wso2UsersList = propsUtil.parseUserResponse(responseBody);
+		}
+
+		return Optional.ofNullable(wso2UsersList).get();
+	}
+
+	public List<WSO2User> createUser(WSO2User wso2User) {
+		String user_api_uri = propsUtil.getIam_server_api_base_url() + propsUtil.getUser_api_context();
+		log.info("user api is ", user_api_uri);
+		List<WSO2User> wso2UsersList = null;
+
+		String payload = null;
+		try {
+			payload = objectMapper.writeValueAsString(wso2User);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		HttpEntity<String> requestBody = propsUtil.prepareRequestBody(payload);
+		ResponseEntity<Object> apiResponse = restTemplate.exchange(user_api_uri, HttpMethod.POST, requestBody,
+				Object.class);
+		log.info("response code of the role api is:\t" + apiResponse.getStatusCode().value());
+		if (HttpStatus.CREATED.value() == apiResponse.getStatusCode().value()) {
+
+			wso2UsersList = findAllUsers();
 		}
 
 		return Optional.ofNullable(wso2UsersList).get();

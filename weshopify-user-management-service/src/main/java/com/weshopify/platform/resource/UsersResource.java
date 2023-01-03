@@ -39,7 +39,8 @@ public class UsersResource {
 	@PostMapping(value = "/users")
 	public ResponseEntity<List<UserBean>> createUser(@RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
-		return null;
+		List<UserBean> usersList = userMgmtService.createUser(userBean);
+		return ResponseEntity.ok(usersList);
 	}
 
 	@GetMapping(value = "/users")
