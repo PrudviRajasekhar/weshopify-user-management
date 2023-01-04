@@ -17,6 +17,7 @@ import com.weshopify.platform.bean.UserBean;
 import com.weshopify.platform.service.RoleMgmtService;
 import com.weshopify.platform.service.UserMgmtService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,7 +38,7 @@ public class UsersResource {
 	private UserMgmtService userMgmtService;
 	
 	@PostMapping(value = "/users")
-	public ResponseEntity<List<UserBean>> createUser(@RequestBody UserBean userBean) {
+	public ResponseEntity<List<UserBean>> createUser(@Valid @RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
 		List<UserBean> usersList = userMgmtService.createUser(userBean);
 		return ResponseEntity.ok(usersList);

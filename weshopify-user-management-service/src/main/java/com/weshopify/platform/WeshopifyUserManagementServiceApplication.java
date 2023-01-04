@@ -3,6 +3,7 @@ package com.weshopify.platform;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,4 +24,6 @@ public class WeshopifyUserManagementServiceApplication {
     ObjectMapper objectMapper() {
     	return new ObjectMapper();
     }
+    
+   
 }
