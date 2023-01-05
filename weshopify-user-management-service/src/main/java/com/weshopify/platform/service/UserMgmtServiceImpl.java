@@ -7,10 +7,12 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.weshopify.platform.bean.UserBean;
+import com.weshopify.platform.exceptions.APIException;
 import com.weshopify.platform.model.WSO2PhoneNumbers;
 import com.weshopify.platform.model.WSO2User;
 import com.weshopify.platform.model.WSO2UserPersonals;
@@ -67,7 +69,7 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 			
 			return usersBeanList;
 		}else {
-			throw new RuntimeException("No Users Found");
+			throw new APIException("No Users Found",HttpStatus.NOT_FOUND.value());
 		}
 		
 	}
