@@ -40,15 +40,23 @@ public class UserAuthnServiceImpl implements UserAuthnService {
 				                           .password(authnBean.getPassword())
 				                           .build();
 		String authnResponse = authnComm.authenticate(wso2AuthnBean);
+		
 		log.info("authntication reposne is {}",authnResponse);
 		JSONObject json = new JSONObject(authnResponse);
 		String access_token = json.getString("access_token");
 		log.info("access token is:\t"+access_token);
+		int expiry = json.getInt("expires_in");
 		if(StringUtils.isNotEmpty(authnResponse)) {
 			String randomHash = authnBean.getUserName()+"_"+RandomStringUtils.random(512);
 			log.info("token hash is {}",randomHash);
 			hashOps.put(authnBean.getUserName(), randomHash, access_token);
-			hashOps.put(access_token,randomHash,authnBean.getUserName());
+			hashOps.put("SUBJECT",access_token,authnBean.getUserName());
+			hashOps.put("tokenExpiry",access_token,String.valueOf(expiry));
+			
+			String jsonResp = authnComm.getUserProfile(access_token);
+			JSONObject userInfoJsonObj = new JSONObject(jsonResp);
+			String userRole = userInfoJsonObj.getString("userRole");
+			hashOps.put("USER_ROLES",access_token,userRole);
 			
 		}
 		return authnResponse;
@@ -64,7 +72,9 @@ public class UserAuthnServiceImpl implements UserAuthnService {
 				String userName = hashOps.get(token, randomHash);
 				log.info("User Name to be logout is:\t"+userName);
 				hashOps.delete(userName, randomHash);
-				hashOps.delete(token, randomHash);
+				hashOps.delete("SUBJECT", token);
+				hashOps.delete("tokenExpiry", token);
+				hashOps.delete("USER_ROLES", token);
 				String logoutMessage  = "User "+userName+" have been loggeout successfully !!";
 				json.put("message", logoutMessage);
 			});
