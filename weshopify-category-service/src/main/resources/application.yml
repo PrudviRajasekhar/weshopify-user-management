@@ -1,0 +1,12 @@
+spring: 
+ application: 
+   name: weshopify-category-service
+ data:
+    redis:
+      host: cache.weshopifyapp.in
+      port: 80
+      password: Redis123$
+   
+server:
+    port: 5016
+  

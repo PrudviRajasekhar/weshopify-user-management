@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.weshopify.platform.model.WSO2User;
 import com.weshopify.platform.model.WSO2UserAuthnBean;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,9 @@ public class IamAuthnCommunicator {
 	
 	@Value("${weshopify-platform.oauth2.userInfoUri}")
 	private String userInfoUri;
+	
+	@Value("${weshopify-platform.scim2.usersUri}")
+	private String usersUrl;
 
 	public String authenticate(WSO2UserAuthnBean authnBean) {
 		log.info("uri is:\t" + authnBean);
@@ -64,7 +68,7 @@ public class IamAuthnCommunicator {
 			authnBean.setScope(scope);
 			String payload = objectMapper.writeValueAsString(authnBean);
 			
-			HttpHeaders headers = basicAuthHeader();
+			HttpHeaders headers = basicAuthHeader(clientId,clientSecret);
 			HttpEntity<String> request = prepareJsonRequestBody(headers,payload);
 
 			ResponseEntity<String> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, String.class);
@@ -84,6 +88,7 @@ public class IamAuthnCommunicator {
 		userInfoUri = userInfoUri+scope;
 		log.info("uri is:\t" + userInfoUri);
 		String respData = null;
+		WSO2User wso2User = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + accessToken);
@@ -94,6 +99,20 @@ public class IamAuthnCommunicator {
 			if (HttpStatus.OK.value() == response.getStatusCode().value()) {
 				respData = response.getBody();
 				log.info("response body is:\t" + respData);
+				JSONObject json = new JSONObject(respData);
+				String userId = json.getString("WeshopifyUserId");
+				log.info("user id is:\t"+userId);
+				//invoke the users/<id> api to fetch the roles
+				String updatedUsersUrl = usersUrl;
+				String updatedUrl = updatedUsersUrl+userId;
+				//usersUrl = usersUrl+userId;
+				HttpHeaders adminHeaders = basicAuthHeader("admin","admin");
+				HttpEntity<String> usersRequestBody = new HttpEntity<String>(adminHeaders);
+				ResponseEntity<String> usersResp = restTemplate.exchange(updatedUrl, HttpMethod.GET, usersRequestBody, String.class);
+				if (HttpStatus.OK.value() == usersResp.getStatusCode().value()) {
+					//wso2User = objectMapper.readValue(usersResp.getBody(), WSO2User.class);
+					respData = usersResp.getBody();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -108,7 +127,7 @@ public class IamAuthnCommunicator {
 		try {
 
 			String payload = "token_type_hint="+tokenType+"&token="+token;
-			HttpHeaders headers = basicAuthHeader();
+			HttpHeaders headers = basicAuthHeader(clientId,clientSecret);
 			
 			HttpEntity<String> request = prepareFormRequestBody(headers,payload);
 			
@@ -127,8 +146,8 @@ public class IamAuthnCommunicator {
 		return Optional.ofNullable(respData).get();
 	}
 
-	private HttpHeaders basicAuthHeader() {
-		String adminCreds = clientId + ":" + clientSecret;
+	private HttpHeaders basicAuthHeader(String username, String password) {
+		String adminCreds = username + ":" + password;
 		log.info("admin creds are:\t" + adminCreds);
 
 		String encodedAdminCreds = Base64.getEncoder().encodeToString(adminCreds.getBytes());
