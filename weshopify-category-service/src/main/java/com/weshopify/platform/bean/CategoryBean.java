@@ -2,11 +2,9 @@ package com.weshopify.platform.bean;
 
 import java.io.Serializable;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class CategoryBean implements Serializable {
 
 	/**
@@ -17,7 +15,7 @@ public class CategoryBean implements Serializable {
 	private int id;
 	private String name;
 	private String alias;
-	private String pcategory;
+	private int pcategory;
 	private boolean enabled;
 	
 
