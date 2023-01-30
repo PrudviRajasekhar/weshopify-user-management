@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: weshopify-brands-service
+
+  data:
+    mongodb:
+      database: WESHOPIFY-BRANDS-SERVICE
+      uri: mongodb+srv://mongo:mongo@cluster0.eczp2kn.mongodb.net/?retryWrites=true&w=majority
+
+server:
+  port: 5017
