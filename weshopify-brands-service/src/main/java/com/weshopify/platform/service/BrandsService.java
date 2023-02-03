@@ -11,8 +11,8 @@ public interface BrandsService {
 	BrandsBean updateBrand(BrandsBean catBean);
 	
 	List<BrandsBean> findAllBrands();
-	BrandsBean findBrandById(int catId);
+	BrandsBean findBrandById(int brandId);
 	
-	List<BrandsBean> deleteBrand(int catId);
+	List<BrandsBean> deleteBrand(int brandId);
 	
 }

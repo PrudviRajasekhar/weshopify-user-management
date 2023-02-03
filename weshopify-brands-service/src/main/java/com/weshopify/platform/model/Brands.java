@@ -6,21 +6,25 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.weshopify.platform.bean.CategoryBean;
+
 import lombok.Data;
 
-@Document
+@Document(collection = "brands")
 @Data
-public class Brands implements Serializable{/**
+public class Brands implements Serializable{
+	
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -929521821994144083L;
 	
 	@Id
-	private int id;
+	private String id;
 
 	private String name;
 	private String logoPath;
 	
-	private List<String> categories;
+	private List<CategoryBean> categories;
 	
 }
