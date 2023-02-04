@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -17,6 +20,7 @@ import com.weshopify.platform.bean.BrandsBean;
 import com.weshopify.platform.bean.CategoryBean;
 import com.weshopify.platform.model.Brands;
 import com.weshopify.platform.outbound.CategoriesApiClient;
+import com.weshopify.platform.outbound.CategoriesApiFeignClient;
 import com.weshopify.platform.repository.BrandsRepo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +31,19 @@ public class BrandsServiceImpl implements BrandsService {
 
 	@Autowired
 	private BrandsRepo brandsRepo;
-	
+
+	// @Autowired
+	// private CategoriesApiClient catApiClient;
+
 	@Autowired
-	private CategoriesApiClient catApiClient;
-	
+	private CategoriesApiFeignClient catApiFeignClient;
+
+	@Value("${services.categories.access-token}")
+	private String accessToken;
+
 	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Override
 	public BrandsBean createBrand(BrandsBean brandsBean) {
 		log.info("Brands Creation Service Method");
@@ -48,14 +58,14 @@ public class BrandsServiceImpl implements BrandsService {
 	@Override
 	public List<BrandsBean> findAllBrands() {
 		List<Brands> brandsList = brandsRepo.findAll();
-		if(!CollectionUtils.isEmpty(brandsList)) {
+		if (!CollectionUtils.isEmpty(brandsList)) {
 			List<BrandsBean> bransBeanList = new ArrayList<>();
-			brandsList.stream().forEach(brand->{
+			brandsList.stream().forEach(brand -> {
 				bransBeanList.add(convertEntityToBean(brand));
 			});
-			
+
 			return bransBeanList;
-		}else {
+		} else {
 			log.error("No Brands Available in DB");
 			throw new RuntimeException("No Brands Available in DB");
 		}
@@ -71,9 +81,46 @@ public class BrandsServiceImpl implements BrandsService {
 		brandsRepo.deleteById(brandId);
 		return findAllBrands();
 	}
-	
+
 	/**
-	 * converting the bean to entity model
+	 * converting the bean to entity model and making a rest template call to
+	 * category service
+	 * 
+	 * @param catBean
+	 * @return
+	 */
+	/*
+	 * private Brands convertBeanToEntity(BrandsBean brandsBean) { Brands
+	 * brandsEntity = new Brands(); brandsEntity.setName(brandsBean.getName());
+	 * brandsEntity.setLogoPath(brandsBean.getLogoPath());
+	 * 
+	 *//**
+		 * invoke the categories service and fetch the categories from categories
+		 * service
+		 *//*
+			 * if(!CollectionUtils.isEmpty(brandsBean.getCategories())) { List<CategoryBean>
+			 * orignalCats = new ArrayList<CategoryBean>();
+			 * brandsBean.getCategories().parallelStream().forEach(catbean->{
+			 * 
+			 * String catResp = catApiClient.findCategoryById(null, catbean.getId()); try {
+			 * orignalCats.add(mapper.readValue(catResp, CategoryBean.class)); } catch
+			 * (JsonMappingException e) { // TODO Auto-generated catch block
+			 * e.printStackTrace(); } catch (JsonProcessingException e) { // TODO
+			 * Auto-generated catch block e.printStackTrace(); }
+			 * 
+			 * 
+			 * }); brandsEntity.setCategories(orignalCats); }
+			 * 
+			 * if(StringUtils.hasText(brandsBean.getId())) {
+			 * brandsEntity.setId(brandsBean.getId()); }
+			 * 
+			 * return brandsEntity; }
+			 * 
+			 */
+
+	/**
+	 * converting the bean to entity model and making a feign client call to
+	 * category service
 	 * 
 	 * @param catBean
 	 * @return
@@ -82,18 +129,24 @@ public class BrandsServiceImpl implements BrandsService {
 		Brands brandsEntity = new Brands();
 		brandsEntity.setName(brandsBean.getName());
 		brandsEntity.setLogoPath(brandsBean.getLogoPath());
-		
+
 		/**
-		 * invoke the categories service and fetch the categories
-		 * from categories service
+		 * invoke the categories service and fetch the categories from categories
+		 * service
 		 */
-		if(!CollectionUtils.isEmpty(brandsBean.getCategories())) {
+		if (!CollectionUtils.isEmpty(brandsBean.getCategories())) {
 			List<CategoryBean> orignalCats = new ArrayList<CategoryBean>();
-				brandsBean.getCategories().parallelStream().forEach(catbean->{
+			Map<String, String> headerMap = new HashMap<>();
+			headerMap.put("Authorization", "Bearer " + accessToken);
 			
-					String catResp = catApiClient.findCategoryById(null, catbean.getId());
+			brandsBean.getCategories().parallelStream().forEach(catbean -> {
+				long startTime = System.currentTimeMillis();
+				ResponseEntity<String> catRespEntity = catApiFeignClient.findCategoryById(catbean.getId(), headerMap);
+				long endTime = System.currentTimeMillis();
+				log.info("total time taken by the category service feign clien client(in millis) {}",(endTime-startTime));
+				if (catRespEntity != null && HttpStatus.OK.value() == catRespEntity.getStatusCode().value()) {
 					try {
-						orignalCats.add(mapper.readValue(catResp, CategoryBean.class));
+						orignalCats.add(mapper.readValue(catRespEntity.getBody(), CategoryBean.class));
 					} catch (JsonMappingException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -101,13 +154,14 @@ public class BrandsServiceImpl implements BrandsService {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-		
-				
+				}
+
 			});
+			
 			brandsEntity.setCategories(orignalCats);
 		}
-		
-		if(StringUtils.hasText(brandsBean.getId())) {
+
+		if (StringUtils.hasText(brandsBean.getId())) {
 			brandsEntity.setId(brandsBean.getId());
 		}
 
@@ -126,7 +180,7 @@ public class BrandsServiceImpl implements BrandsService {
 		brandsBean.setLogoPath(brandsEntity.getLogoPath());
 		brandsBean.setCategories(brandsEntity.getCategories());
 		brandsBean.setId(brandsEntity.getId());
-	    return brandsBean;
+		return brandsBean;
 	}
 
 }
