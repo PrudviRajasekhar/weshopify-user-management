@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weshopify.platform.bean.BrandsBean;
 import com.weshopify.platform.bean.CategoryBean;
+import com.weshopify.platform.exceptions.APIException;
 import com.weshopify.platform.model.Brands;
-import com.weshopify.platform.outbound.CategoriesApiClient;
 import com.weshopify.platform.outbound.CategoriesApiFeignClient;
 import com.weshopify.platform.repository.BrandsRepo;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -37,9 +38,9 @@ public class BrandsServiceImpl implements BrandsService {
 
 	@Autowired
 	private CategoriesApiFeignClient catApiFeignClient;
-
-	@Value("${services.categories.access-token}")
-	private String accessToken;
+	
+	@Autowired
+	private HttpServletRequest request;
 
 	@Autowired
 	private ObjectMapper mapper;
@@ -47,7 +48,12 @@ public class BrandsServiceImpl implements BrandsService {
 	@Override
 	public BrandsBean createBrand(BrandsBean brandsBean) {
 		log.info("Brands Creation Service Method");
-		return convertEntityToBean(brandsRepo.save(convertBeanToEntity(brandsBean)));
+		try {
+			return convertEntityToBean(brandsRepo.save(convertBeanToEntity(brandsBean)));
+		}catch (Exception e) {
+			throw new APIException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
+		
 	}
 
 	@Override
@@ -136,8 +142,9 @@ public class BrandsServiceImpl implements BrandsService {
 		 */
 		if (!CollectionUtils.isEmpty(brandsBean.getCategories())) {
 			List<CategoryBean> orignalCats = new ArrayList<CategoryBean>();
+			String headerWithBearer =  request.getHeader(HttpHeaders.AUTHORIZATION);
 			Map<String, String> headerMap = new HashMap<>();
-			headerMap.put("Authorization", "Bearer " + accessToken);
+			headerMap.put(HttpHeaders.AUTHORIZATION, headerWithBearer);
 			
 			brandsBean.getCategories().parallelStream().forEach(catbean -> {
 				long startTime = System.currentTimeMillis();
@@ -148,11 +155,9 @@ public class BrandsServiceImpl implements BrandsService {
 					try {
 						orignalCats.add(mapper.readValue(catRespEntity.getBody(), CategoryBean.class));
 					} catch (JsonMappingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						throw new APIException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR.value());
 					} catch (JsonProcessingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						throw new APIException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR.value());
 					}
 				}
 
@@ -181,6 +186,12 @@ public class BrandsServiceImpl implements BrandsService {
 		brandsBean.setCategories(brandsEntity.getCategories());
 		brandsBean.setId(brandsEntity.getId());
 		return brandsBean;
+	}
+
+	@Override
+	public void cleanDb() {
+		brandsRepo.deleteAll();
+		
 	}
 
 }

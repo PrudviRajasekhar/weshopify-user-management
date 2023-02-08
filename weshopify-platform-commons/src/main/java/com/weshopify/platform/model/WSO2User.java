@@ -2,6 +2,9 @@ package com.weshopify.platform.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +31,8 @@ public class WSO2User implements Serializable {
 	
 	private WSO2UserPersonals name;
 	
+	@JsonIgnore
+	private Map<String, String> meta;
 	//@JsonIgnore
 	private List<Role> roles;
 	private List<WSO2PhoneNumbers> phoneNumbers;
