@@ -50,7 +50,7 @@ public class CategoryResource {
 	@Operation(summary = "updateCategory", security = @SecurityRequirement(name = "bearerAuth"))
 	@PutMapping("/categories")
 	public ResponseEntity<CategoryBean> updateCategory(@RequestBody CategoryBean catBean) {
-		return ResponseEntity.ok(catService.createCategory(catBean));
+		return ResponseEntity.ok(catService.updateCategory(catBean));
 	}
 
 	@Operation(summary = "deleteCategory", security = @SecurityRequirement(name = "bearerAuth"))

@@ -2,11 +2,17 @@ package com.weshopify.platform.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.weshopify.platform.bean.CategoryBean;
+import com.weshopify.platform.cqrs.commands.CategoryCommand;
 import com.weshopify.platform.model.Category;
 import com.weshopify.platform.repo.CategoriesRepository;
 
@@ -17,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 public class CategoryServiceImpl implements CategoryService {
 
 	private CategoriesRepository catRepo;
+	
+	@Autowired
+	private CommandGateway commandBus;
 
 	CategoryServiceImpl(CategoriesRepository catRepo) {
 		this.catRepo = catRepo;
@@ -29,7 +38,18 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryBean updateCategory(CategoryBean catBean) {
-		return convertEntityToBean(catRepo.save(convertBeanToEntity(catBean)));
+		catBean = convertEntityToBean(catRepo.save(convertBeanToEntity(catBean)));
+		
+		CategoryCommand catCommand = createCommand(catBean);
+		
+		log.info("step-1: Command sending to the Command Handler");
+		CompletableFuture<CategoryCommand> future = commandBus.send(catCommand);
+		if(future.isDone()) {
+			log.info("category updates were delivered to consumer services");
+		}else {
+			log.error("category updates were not delivered to the consumers. they may retry the event store");
+		}
+		return catBean;
 	}
 
 	@Override
@@ -114,6 +134,22 @@ public class CategoryServiceImpl implements CategoryService {
 	    }
 	    
 	    return catBean;
+	}
+	
+	/**
+	 * Converting the updated bean to the command
+	 * @param catBean
+	 * @return
+	 */
+	private CategoryCommand createCommand(CategoryBean catBean) {
+		CategoryCommand catCommand = new CategoryCommand();
+		catCommand.setAlias(catBean.getAlias());
+		catCommand.setName(catBean.getName());
+		catCommand.setEnabled(catBean.isEnabled());
+		String randomId = RandomStringUtils.randomAlphanumeric(17).toUpperCase();
+		catCommand.setId(randomId);
+		catCommand.setPcategory(catBean.getPcategory());
+	    return catCommand;
 	}
 
 }
