@@ -16,7 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 public class CategoriesAggregate {
 
 	@AggregateIdentifier
-	private String id;
+	private String eventId;
+	private int id;
 	private String name;
 	private String alias;
 	private int pcategory;
@@ -26,19 +27,21 @@ public class CategoriesAggregate {
 	public CategoriesAggregate(CategoryCommand command) {
 		log.info("step-2: command handler recived the command and Creating an Event");
 		CategoryEvent event = CategoryEvent.builder().name(command.getName()).alias(command.getAlias())
-				.enabled(command.isEnabled()).id(command.getId()).pcategory(command.getPcategory()).build();
-		
+				.id(command.getId()).enabled(command.isEnabled()).eventId(command.getEventId())
+				.pcategory(command.getPcategory()).build();
+
 		log.info("step-3: Publishing the Created Event to the Event Handlers");
 		AggregateLifecycle.apply(event);
 	}
-	
+
 	@EventSourcingHandler
 	public void on(CategoryEvent event) {
 		log.info("step-4: Event Handler recived the event");
+		this.eventId = event.getEventId();
 		this.id=event.getId();
-		this.enabled=event.isEnabled();
-		this.alias=event.getAlias();
-		this.name=event.getName();
-		this.pcategory=event.getPcategory();
+		this.enabled = event.isEnabled();
+		this.alias = event.getAlias();
+		this.name = event.getName();
+		this.pcategory = event.getPcategory();
 	}
 }

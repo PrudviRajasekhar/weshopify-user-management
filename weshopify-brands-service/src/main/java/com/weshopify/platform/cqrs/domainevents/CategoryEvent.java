@@ -15,8 +15,8 @@ public class CategoryEvent implements Serializable {
 	 */
 	private static final long serialVersionUID = -6674937149851038361L;
 
-	private int id;
 	private String eventId;
+	private int id;
 	private String name;
 	private String alias;
 	private int pcategory;

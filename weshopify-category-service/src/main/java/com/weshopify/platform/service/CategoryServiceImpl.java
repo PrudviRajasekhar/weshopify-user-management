@@ -147,7 +147,8 @@ public class CategoryServiceImpl implements CategoryService {
 		catCommand.setName(catBean.getName());
 		catCommand.setEnabled(catBean.isEnabled());
 		String randomId = RandomStringUtils.randomAlphanumeric(17).toUpperCase();
-		catCommand.setId(randomId);
+		catCommand.setEventId(randomId);
+		catCommand.setId(catBean.getId());
 		catCommand.setPcategory(catBean.getPcategory());
 	    return catCommand;
 	}
