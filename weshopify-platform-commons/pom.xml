@@ -61,9 +61,11 @@
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
+							<artifactId>lombok</artifactId>							
+						</exclude>						
 					</excludes>
+					<!-- this will create two jars one is executable and another is non-executable -->
+					<classifier>exec</classifier>
 				</configuration>
 			</plugin>
 		</plugins>
