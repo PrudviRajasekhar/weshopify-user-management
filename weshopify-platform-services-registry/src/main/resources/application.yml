@@ -9,4 +9,7 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+  instance:
+    hostname: ${REGISTRY_HOST_NAME:localhost}
+    prefer-ip-address: true
   

@@ -51,6 +51,7 @@
 	</dependencyManagement>
 
 	<build>
+	    <finalName>weshopify-service-registry</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
