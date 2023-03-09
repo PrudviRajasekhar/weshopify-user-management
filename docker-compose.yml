@@ -17,6 +17,8 @@ services:
   restart: on-failure
   ports:
     - 8761:8761
+  environment: 
+   - REGISTRY_PREF_IP=false
 
  weshopify-axon-server: 
   container_name: weshopify-event-store
@@ -88,6 +90,24 @@ services:
    - AXON_SERVER_PORT=8124
    - CATEGORIES_SVC_HOST=weshopify-categories-svc
    - CATEGORIES_SVC_PORT=5016
+   - ZIPKIN_HOST=weshopify-zipkin-service
+   - ZIPKIN_PORT=9411
 
+ weshopify-gateway-svc: 
+  container_name: weshopify-gateway-svc
+  image: weshopify-gateway-svc-img
+  restart: on-failure
+  ports:
+    - 5012:5012
+  environment: 
+   - SERVICE_REGISTRY_HOST=weshopify-registry-svc
+   - SERVICE_REGISTRY_PORT=8761
+
+ weshopify-zipkin-service: 
+  container_name: zipkin
+  image: openzipkin/zipkin
+  restart: on-failure
+  ports:
+    - 9411:9411
 
      
