@@ -29,12 +29,12 @@ public class CategoriesApiClient {
 	@Autowired
 	private HttpServletRequest request;
 	
-	public String findCategoryById(String access_token,int catId) {
+	public String findCategoryById(String headerWithBearer,int catId) {
 		
 		/**
 		 * step-1: Prepare the Authorization header 
 		 */
-		String headerWithBearer =  request.getHeader(HttpHeaders.AUTHORIZATION);
+		//String headerWithBearer =  request.getHeader(HttpHeaders.AUTHORIZATION);
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.AUTHORIZATION, headerWithBearer);
 		

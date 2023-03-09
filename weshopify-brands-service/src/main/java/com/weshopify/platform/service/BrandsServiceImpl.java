@@ -22,6 +22,7 @@ import com.weshopify.platform.bean.BrandsBean;
 import com.weshopify.platform.bean.CategoryBean;
 import com.weshopify.platform.exceptions.APIException;
 import com.weshopify.platform.model.Brands;
+import com.weshopify.platform.outbound.CategoriesApiClient;
 import com.weshopify.platform.outbound.CategoriesApiFeignClient;
 import com.weshopify.platform.repository.BrandsRepo;
 
@@ -35,8 +36,8 @@ public class BrandsServiceImpl implements BrandsService {
 	@Autowired
 	private BrandsRepo brandsRepo;
 
-	// @Autowired
-	// private CategoriesApiClient catApiClient;
+	@Autowired
+	private CategoriesApiClient catApiClient;
 
 	@Autowired
 	private CategoriesApiFeignClient catApiFeignClient;
@@ -150,6 +151,8 @@ public class BrandsServiceImpl implements BrandsService {
 			
 			brandsBean.getCategories().parallelStream().forEach(catbean -> {
 				long startTime = System.currentTimeMillis();
+				log.info("invoking the category service via feign client");
+				catApiClient.findCategoryById(headerWithBearer, catbean.getId());
 				ResponseEntity<String> catRespEntity = catApiFeignClient.findCategoryById(catbean.getId(), headerMap);
 				long endTime = System.currentTimeMillis();
 				log.info("total time taken by the category service feign clien client(in millis) {}",(endTime-startTime));

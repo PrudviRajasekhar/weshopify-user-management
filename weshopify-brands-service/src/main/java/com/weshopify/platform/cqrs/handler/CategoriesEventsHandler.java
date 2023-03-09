@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.axonframework.eventhandling.EventHandler;
-import org.axonframework.queryhandling.QueryHandler;
+/*import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.queryhandling.QueryHandler;*/
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -23,7 +23,7 @@ public class CategoriesEventsHandler {
 	@Autowired
 	private BrandsRepo brandsRepo;
 	
-	@EventHandler
+	//@EventHandler
 	public CategoryEvent categoryEventHandler(CategoryEvent event) {
 		log.info("event recived in categoryEventHandler is "+event.toString());
 		
@@ -53,7 +53,7 @@ public class CategoriesEventsHandler {
 		return null;
 	}
 	
-	@QueryHandler
+	//@QueryHandler
 	public CategoryEvent queryCategoryEvents(CategoryEvent event) {
 		log.info("event recived in queryCategoryEvents is "+event.toString());
 		return null;

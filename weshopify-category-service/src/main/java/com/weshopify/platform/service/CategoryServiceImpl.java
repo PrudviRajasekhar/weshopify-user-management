@@ -2,11 +2,10 @@ package com.weshopify.platform.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.axonframework.commandhandling.gateway.CommandGateway;
+//import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -24,8 +23,9 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private CategoriesRepository catRepo;
 	
-	@Autowired
-	private CommandGateway commandBus;
+	/*
+	 * @Autowired private CommandGateway commandBus;
+	 */
 
 	CategoryServiceImpl(CategoriesRepository catRepo) {
 		this.catRepo = catRepo;
@@ -43,12 +43,14 @@ public class CategoryServiceImpl implements CategoryService {
 		CategoryCommand catCommand = createCommand(catBean);
 		
 		log.info("step-1: Command sending to the Command Handler");
-		CompletableFuture<CategoryCommand> future = commandBus.send(catCommand);
-		if(future.isDone()) {
-			log.info("category updates were delivered to consumer services");
-		}else {
-			log.error("category updates were not delivered to the consumers. they may retry the event store");
-		}
+		/*
+		 * CompletableFuture<CategoryCommand> future = commandBus.send(catCommand);
+		 * if(future.isDone()) {
+		 * log.info("category updates were delivered to consumer services"); }else {
+		 * log.
+		 * error("category updates were not delivered to the consumers. they may retry the event store"
+		 * ); }
+		 */
 		return catBean;
 	}
 
@@ -68,6 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryBean findCategoryById(int catId) {
+		log.info("in category service-->findCategoryById ");
 		return convertEntityToBean(catRepo.findById(catId).get());
 	}
 

@@ -16,9 +16,11 @@ import com.weshopify.platform.service.CategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
 
 
 @RestController
+@Slf4j
 public class CategoryResource {
 
 	private CategoryService catService;
@@ -62,6 +64,7 @@ public class CategoryResource {
 	@Operation(summary = "getCategoryById", security = @SecurityRequirement(name = "bearerAuth"))
 	@GetMapping("/categories/{catId}")
 	public ResponseEntity<CategoryBean> getCategoryById(@PathVariable("catId") int catId) {
+		log.info("get category by caegory id is invoking");
 		return ResponseEntity.ok(catService.findCategoryById(catId));
 	}
 

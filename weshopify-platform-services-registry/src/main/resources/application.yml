@@ -12,4 +12,19 @@ eureka:
   instance:
     hostname: ${REGISTRY_HOST_NAME:localhost}
     prefer-ip-address: true
+    
+
   
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  
+  tracing: 
+     sampling: 
+        probability: 1.0
+
+logging:
+   pattern: 
+     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
