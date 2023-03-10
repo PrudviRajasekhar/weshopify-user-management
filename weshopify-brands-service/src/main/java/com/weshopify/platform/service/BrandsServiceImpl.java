@@ -51,11 +51,12 @@ public class BrandsServiceImpl implements BrandsService {
 	@Override
 	public BrandsBean createBrand(BrandsBean brandsBean) {
 		log.info("Brands Creation Service Method");
-		try {
+		//try {
 			return convertEntityToBean(brandsRepo.save(convertBeanToEntity(brandsBean)));
-		}catch (Exception e) {
-			throw new APIException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
+			/*
+			 * }catch (Exception e) { throw new APIException(e.getMessage(),
+			 * HttpStatus.INTERNAL_SERVER_ERROR.value()); }
+			 */
 		
 	}
 
