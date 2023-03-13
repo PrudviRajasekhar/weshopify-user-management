@@ -1,5 +1,8 @@
 package com.weshopify.platform.outbound;
 
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+
 import java.util.Base64;
 import java.util.Optional;
 
@@ -22,6 +25,11 @@ import com.weshopify.platform.model.WSO2User;
 import com.weshopify.platform.model.WSO2UserAuthnBean;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 @Component
 @Slf4j
@@ -70,7 +78,9 @@ public class IamAuthnCommunicator {
 			
 			HttpHeaders headers = basicAuthHeader(clientId,clientSecret);
 			HttpEntity<String> request = prepareJsonRequestBody(headers,payload);
-
+			
+			ignoreCertificates();
+			
 			ResponseEntity<String> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, String.class);
 			log.info("status code is:\t" + response.getStatusCode().value());
 			if (HttpStatus.OK.value() == response.getStatusCode().value()) {
@@ -169,6 +179,31 @@ public class IamAuthnCommunicator {
 		headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 		HttpEntity<String> requestBody = new HttpEntity<String>(payload, headers);
 		return requestBody;
+	}
+	
+	private void ignoreCertificates() {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			@Override
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			}
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			}
+		} };
+
+		try {
+			SSLContext sc = SSLContext.getInstance("TLS");
+			sc.init(null, trustAllCerts, new SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {
+
+		}
 	}
 
 }
