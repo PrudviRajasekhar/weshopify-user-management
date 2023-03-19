@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: weshopify-shipment-service
+
+server:
+  port: 5021
