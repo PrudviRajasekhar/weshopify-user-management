@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
+
 @SpringBootApplication
 public class WeshopifyAuthnManagementServiceApplication {
 
@@ -17,5 +20,9 @@ public class WeshopifyAuthnManagementServiceApplication {
 		return new RestTemplate();
 	}
 	
+	@Bean
+	public TimedAspect timedAspect(MeterRegistry registry) {
+	    return new TimedAspect(registry);
+	}
 
 }

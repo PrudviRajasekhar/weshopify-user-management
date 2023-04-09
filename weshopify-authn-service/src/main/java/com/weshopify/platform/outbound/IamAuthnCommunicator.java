@@ -75,14 +75,17 @@ public class IamAuthnCommunicator {
 			authnBean.setGrant_type(grant_type);
 			authnBean.setScope(scope);
 			String payload = objectMapper.writeValueAsString(authnBean);
+			log.info("payload is:\t"+payload);
 			
 			HttpHeaders headers = basicAuthHeader(clientId,clientSecret);
 			HttpEntity<String> request = prepareJsonRequestBody(headers,payload);
 			
-			ignoreCertificates();
+			//ignoreCertificates();
+			log.info("token url is:\t"+tokenUrl);
 			
 			ResponseEntity<String> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, request, String.class);
 			log.info("status code is:\t" + response.getStatusCode().value());
+			
 			if (HttpStatus.OK.value() == response.getStatusCode().value()) {
 				respData = response.getBody();
 				log.info("response body is:\t" + respData);
@@ -103,7 +106,7 @@ public class IamAuthnCommunicator {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + accessToken);
 			HttpEntity<String> requestBody = new HttpEntity<String>(headers);
-			
+			ignoreCertificates();
 			ResponseEntity<String> response = restTemplate.exchange(userInfoUri, HttpMethod.GET, requestBody, String.class);
 			log.info("status code is:\t" + response.getStatusCode().value());
 			if (HttpStatus.OK.value() == response.getStatusCode().value()) {
@@ -140,7 +143,7 @@ public class IamAuthnCommunicator {
 			HttpHeaders headers = basicAuthHeader(clientId,clientSecret);
 			
 			HttpEntity<String> request = prepareFormRequestBody(headers,payload);
-			
+			ignoreCertificates();
 			ResponseEntity<String> response = restTemplate.exchange(logoutUri, HttpMethod.POST, request, String.class);
 			log.info("status code is:\t" + response.getStatusCode().value());
 			if (HttpStatus.OK.value() == response.getStatusCode().value()) {
