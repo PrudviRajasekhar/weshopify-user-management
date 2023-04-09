@@ -21,4 +21,17 @@ iamserver:
   password: ${WSO2_SERVER_USER_PASSWORD:admin}
   role-api-schema: urn:ietf:params:scim:schemas:extension:2.0:Role
   
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    health:
+      show-details: always
+      
+
+        
+  
 

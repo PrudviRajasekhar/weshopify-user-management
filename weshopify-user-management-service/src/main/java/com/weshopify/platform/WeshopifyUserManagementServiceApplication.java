@@ -8,6 +8,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
+
 @SpringBootApplication
 public class WeshopifyUserManagementServiceApplication {
 
@@ -24,6 +27,16 @@ public class WeshopifyUserManagementServiceApplication {
     ObjectMapper objectMapper() {
     	return new ObjectMapper();
     }
+    
+    /**
+     * for recording custom metrics by the prometheous server
+     * @param registry
+     * @return
+     */
+    @Bean
+	public TimedAspect timedAspect(MeterRegistry registry) {
+	    return new TimedAspect(registry);
+	}
     
    
 }
