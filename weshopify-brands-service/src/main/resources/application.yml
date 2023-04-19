@@ -22,6 +22,7 @@ spring:
       micrometer:
         enabled: true
         
+        
       
 axon:
   axonserver:
@@ -50,9 +51,44 @@ management:
   tracing: 
      sampling: 
         probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
 logging:
    pattern: 
      level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+     
+resilience4j:
+#  circuitbreaker:
+#    configs:
+#      default: 
+#        register-health-indicator: true
+#    instances:
+#      brands-circuit: 
+#        minimum-number-of-calls: 5
+#        failure-rate-threshold: 50
+#        wait-duration-in-open-state: 30000
+#        permitted-number-of-calls-in-half-open-state: 2
+#  retry:
+#    instances:
+#      brands-categories-retry: 
+#        max-attempts: 3
+#        wait-duration: 10s
+#  ratelimiter:
+#    instances:
+#      brands-api-ratelimitor: 
+#       register-health-indicator:  true
+#       limit-for-period: 3
+#       limit-refresh-period: 5s
+#       timeout-duration: 5s
+       
+  bulkhead:
+    instances:
+      brands-api-bulkhead: 
+        max-concurrent-calls: 5
+        max-wait-duration: 5s
+         
+      
 
 
 

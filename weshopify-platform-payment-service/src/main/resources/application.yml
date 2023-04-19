@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: weshopify-payment-service
+
+server:
+  port: 5020

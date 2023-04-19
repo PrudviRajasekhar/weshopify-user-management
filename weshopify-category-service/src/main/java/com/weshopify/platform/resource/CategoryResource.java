@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.weshopify.platform.bean.CategoryBean;
 import com.weshopify.platform.service.CategoryService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,7 @@ public class CategoryResource {
 
 	@Operation(summary = "getCategoryById", security = @SecurityRequirement(name = "bearerAuth"))
 	@GetMapping("/categories/{catId}")
+	@CircuitBreaker(name = "categories-circuit")
 	public ResponseEntity<CategoryBean> getCategoryById(@PathVariable("catId") int catId) {
 		log.info("get category by caegory id is invoking");
 		return ResponseEntity.ok(catService.findCategoryById(catId));

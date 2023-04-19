@@ -33,7 +33,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://${SERVICE_REGISTRY_HOST:localhost}:${SERVICE_REGISTRY_PORT:8761}/eureka/
+      defaultZone: http://${SERVICE_REGISTRY_HOST:localhost}:${SERVICE_REGISTRY_PORT:5011}/eureka/
   instance:
     hostname: ${SERVICE_REGISTRY_HOST:localhost}
     prefer-ip-address: true

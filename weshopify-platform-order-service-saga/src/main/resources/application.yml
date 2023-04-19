@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: weshopify-orders-service
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2Console
+#  datasource:
+#    url: jdbc:h2:mem:orders
+#    username: sa
+#    password:
+server:
+  port: 5019
+  
+product: 
+  svs: 
+    baseUrl: http://localhost:5023/products

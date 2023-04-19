@@ -51,11 +51,12 @@ public class BrandsServiceImpl implements BrandsService {
 	@Override
 	public BrandsBean createBrand(BrandsBean brandsBean) {
 		log.info("Brands Creation Service Method");
-		try {
+		//try {
 			return convertEntityToBean(brandsRepo.save(convertBeanToEntity(brandsBean)));
-		}catch (Exception e) {
-			throw new APIException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-		}
+			/*
+			 * }catch (Exception e) { throw new APIException(e.getMessage(),
+			 * HttpStatus.INTERNAL_SERVER_ERROR.value()); }
+			 */
 		
 	}
 
@@ -152,18 +153,20 @@ public class BrandsServiceImpl implements BrandsService {
 			brandsBean.getCategories().parallelStream().forEach(catbean -> {
 				long startTime = System.currentTimeMillis();
 				log.info("invoking the category service via feign client");
-				catApiClient.findCategoryById(headerWithBearer, catbean.getId());
 				ResponseEntity<String> catRespEntity = catApiFeignClient.findCategoryById(catbean.getId(), headerMap);
 				long endTime = System.currentTimeMillis();
 				log.info("total time taken by the category service feign clien client(in millis) {}",(endTime-startTime));
 				if (catRespEntity != null && HttpStatus.OK.value() == catRespEntity.getStatusCode().value()) {
 					try {
+						log.info("categories api invoked successfully:\t"+catRespEntity.getBody());
 						orignalCats.add(mapper.readValue(catRespEntity.getBody(), CategoryBean.class));
 					} catch (JsonMappingException e) {
 						throw new APIException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR.value());
 					} catch (JsonProcessingException e) {
 						throw new APIException(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR.value());
 					}
+				}else {
+					log.info("categories call not success, retry pattern is retrying for every 3s");
 				}
 
 			});

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.weshopify.platform.bean.BrandsBean;
 import com.weshopify.platform.service.BrandsService;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +40,27 @@ public class BrandsResource {
 	
 	@Operation(summary = "createBrands", security = @SecurityRequirement(name = "bearerAuth"))
 	@PostMapping("/brands")
-	public ResponseEntity<BrandsBean> createBrands(@RequestBody BrandsBean brandsBean){
+	//@CircuitBreaker(name = "brands-circuit", fallbackMethod = "createBrands_fallback")
+	//@Retry(name = "brands-categories-retry")
+	//@RateLimiter(name = "brands-api-ratelimitor",fallbackMethod = "createBrands_fallback")
+	@Bulkhead(name = "brands-api-bulkhead", fallbackMethod = "createBrands_fallback")
+	public ResponseEntity<Object> createBrands(@RequestBody BrandsBean brandsBean){
 		log.info("barnds bean data is:\t"+brandsBean.toString());
-		return ResponseEntity.ok(brandsService.createBrand(brandsBean));
+		brandsBean = brandsService.createBrand(brandsBean);
+		if(brandsBean != null) {
+			return ResponseEntity.ok(brandsBean);
+		}else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Brands Not Created");
+		}
+		
+		
+	}
+	
+	public ResponseEntity<Object> createBrands_fallback(Throwable th){
+		Map<String, String> map = new HashMap<>();
+		map.put("key", "Categories Service is down at this moment!! Please try after some time");
+		return ResponseEntity.ok(map);
+		
 	}
 	
 	@Operation(summary = "updateBrandsBean", security = @SecurityRequirement(name = "bearerAuth"))

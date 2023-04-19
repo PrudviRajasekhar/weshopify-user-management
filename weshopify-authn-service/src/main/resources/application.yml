@@ -20,3 +20,13 @@ weshopify-platform:
     scope: ${SCOPE:openid}
     clientId: ${CLIENT_ID:QLGGcnm3X3aW61N0uFEc8uKq_FAa}
     clientSecret: ${CLIENT_SECRET:3kqsCWj64H6O4szaJDfmYwEdvBka}
+    
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+        

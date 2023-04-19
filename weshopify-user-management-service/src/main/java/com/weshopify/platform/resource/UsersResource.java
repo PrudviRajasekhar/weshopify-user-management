@@ -17,6 +17,7 @@ import com.weshopify.platform.bean.UserBean;
 import com.weshopify.platform.service.RoleMgmtService;
 import com.weshopify.platform.service.UserMgmtService;
 
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +38,7 @@ public class UsersResource {
 	@Autowired
 	private UserMgmtService userMgmtService;
 	
+	@Timed(value = "weshopifyUsers.time")
 	@PostMapping(value = "/users")
 	public ResponseEntity<List<UserBean>> createUser(@Valid @RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
@@ -44,18 +46,21 @@ public class UsersResource {
 		return ResponseEntity.ok(usersList);
 	}
 
+	@Timed(value = "weshopifyUsers.time")
 	@GetMapping(value = "/users")
 	public ResponseEntity<List<UserBean>> findAllUsers() {
 		List<UserBean> usersList = userMgmtService.getAllUsers();
 		return ResponseEntity.ok(usersList);
 	}
 
+	@Timed(value = "weshopifyUsers.time")
 	@PutMapping(value = "/users")
 	public ResponseEntity<List<UserBean>> updateUser(@RequestBody UserBean userBean) {
 		log.info("Weshopify Users Data is: " + userBean.toString());
 		return null;
 	}
 
+	@Timed(value = "weshopifyUsers.time")
 	@GetMapping(value = "/users/{userId}")
 	public ResponseEntity<UserBean> findUserById(@PathVariable("userId") String userId) {
 		return null;
