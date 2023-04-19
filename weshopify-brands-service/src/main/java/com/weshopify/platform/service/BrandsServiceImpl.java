@@ -2,8 +2,10 @@ package com.weshopify.platform.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,7 @@ import com.weshopify.platform.bean.BrandsBean;
 import com.weshopify.platform.bean.CategoryBean;
 import com.weshopify.platform.exceptions.APIException;
 import com.weshopify.platform.model.Brands;
+import com.weshopify.platform.outbound.CategoriesApiClient;
 import com.weshopify.platform.outbound.CategoriesApiFeignClient;
 import com.weshopify.platform.repository.BrandsRepo;
 
@@ -33,8 +36,8 @@ public class BrandsServiceImpl implements BrandsService {
 	@Autowired
 	private BrandsRepo brandsRepo;
 
-	// @Autowired
-	// private CategoriesApiClient catApiClient;
+	@Autowired
+	private CategoriesApiClient catApiClient;
 
 	@Autowired
 	private CategoriesApiFeignClient catApiFeignClient;
@@ -141,13 +144,15 @@ public class BrandsServiceImpl implements BrandsService {
 		 * service
 		 */
 		if (!CollectionUtils.isEmpty(brandsBean.getCategories())) {
-			List<CategoryBean> orignalCats = new ArrayList<CategoryBean>();
+			Set<CategoryBean> orignalCats = new HashSet<CategoryBean>();
 			String headerWithBearer =  request.getHeader(HttpHeaders.AUTHORIZATION);
 			Map<String, String> headerMap = new HashMap<>();
 			headerMap.put(HttpHeaders.AUTHORIZATION, headerWithBearer);
 			
 			brandsBean.getCategories().parallelStream().forEach(catbean -> {
 				long startTime = System.currentTimeMillis();
+				log.info("invoking the category service via feign client");
+				catApiClient.findCategoryById(headerWithBearer, catbean.getId());
 				ResponseEntity<String> catRespEntity = catApiFeignClient.findCategoryById(catbean.getId(), headerMap);
 				long endTime = System.currentTimeMillis();
 				log.info("total time taken by the category service feign clien client(in millis) {}",(endTime-startTime));
